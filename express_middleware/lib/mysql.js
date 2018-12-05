@@ -89,7 +89,43 @@ Mysql.fuzzySearch = function (query, no_fuzzy_params_array, callback) { //pid
         });
     });
 };
+Mysql.fuzzySearchDescByParam = function (query, no_fuzzy_params_array, param, callback) { //pid
+    var sql = "SELECT * FROM " + query.table + " ";
+    var flag = 0;
+    for (var i in query) {
+        if (typeof (query[i]) != "undefined" && i != "table") {
+            if (flag == 0) {
+                sql += " where ";
+                flag = 1;
+            } else {
+                sql += " and "
+            }
 
+            var is_no_funzzy_param = false;
+            for(var j in no_fuzzy_params_array) {
+                if(i == no_fuzzy_params_array[j]) {
+                    is_no_funzzy_param = true;
+                }
+            }
+
+            if(is_no_funzzy_param)
+            {
+                sql = sql + i + " ='" + query[i] + "' ";
+            } else {
+                sql = sql + i + " like '%" + query[i] + "%' ";
+            }
+        }
+    }
+    sql += " order by " + param + " desc";
+    Utils.log(sql);
+
+    pool.getConnection(function (err, connection) {
+        connection.query(sql, function (err, result) {
+            connection.release();
+            callback(err, result);
+        });
+    });
+};
 //improve it, it has some problems
 //if exist,update.if not exist,insert
 Mysql.insertOrUpdate = function(table, primary_key, set, callback) {

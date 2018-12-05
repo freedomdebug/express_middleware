@@ -127,7 +127,7 @@ Utils.getSubStringBySysbmol = function(str, split_sysbmol, split_length, is_righ
     return substr;
 };
 
-//id is string
+//id is string,32 bit,lower case
 Utils.getMd5ById = function(id) {
     var md5 = crypto.createHash('md5');
     return md5.update(id).digest('hex');
