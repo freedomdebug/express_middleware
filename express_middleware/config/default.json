@@ -1,0 +1,11 @@
+{
+  "name": "../config/default.json",
+  "mysqlhost": "127.0.0.1",
+  "mysqluser": "root",
+  "mysqlpassword": "1",
+  "mysqlcharset": "utf8",
+  "mysqldatabase": "dev",
+  "mysqldateStrings": "true",
+  "testTopic": "testTopic",
+  "kafakclient": "127.0.0.1"
+}
