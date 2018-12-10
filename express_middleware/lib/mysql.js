@@ -176,6 +176,75 @@ Mysql.insertOrUpdate = function(table, primary_key, set, callback) {
 };
 
 //todo,select * where .. in ...
+Query.awaitFuzzySearchDescByParam = function (query, no_fuzzy_params_array, param) { //pid
+    var sql = "SELECT * FROM " + query.table + " ";
+    var flag = 0;
+    for (var i in query) {
+        if (typeof (query[i]) != "undefined" && i != "table") {
+            if (flag == 0) {
+                sql += " where ";
+                flag = 1;
+            } else {
+                sql += " and "
+            }
+
+            var is_no_funzzy_param = false;
+            for(var j in no_fuzzy_params_array) {
+                if(i == no_fuzzy_params_array[j]) {
+                    is_no_funzzy_param = true;
+                }
+            }
+
+            if(is_no_funzzy_param)
+            {
+                sql = sql + i + " ='" + query[i] + "' ";
+            } else {
+                sql = sql + i + " like '%" + query[i] + "%' ";
+            }
+        }
+    }
+    sql += " order by " + param + " desc";
+    Utils.log(sql);
+
+    return new Promise(( resolve, reject ) => {
+        pool.getConnection(function(err, connection) {
+            if (err) {
+                reject( err )
+            } else {
+                connection.query(sql,  ( err, rows) => {
+                    if ( err ) {
+                        reject( err )
+                    } else {
+                        resolve( rows )
+                    }
+                    // 结束会话
+                    connection.release()
+                })
+            }
+        })
+    });
+};
+Query.awaitCommonWithParam = function (sqlString, values) {
+    Utils.log("Query.commonWithParam:sqlString is " + sqlString, "; values are ", values);
+
+    return new Promise(( resolve, reject ) => {
+        pool.getConnection(function(err, connection) {
+            if (err) {
+                reject( err )
+            } else {
+                connection.query(sqlString, values,  ( err, rows) => {
+                    if ( err ) {
+                        reject( err )
+                    } else {
+                        resolve( rows )
+                    }
+                    // 结束会话
+                    connection.release()
+                })
+            }
+        })
+    });
+};
 Mysql.awaitSelectDB = function(query) {
     var sql = "SELECT * FROM " + query.table + " ";
     var flag = 0;
