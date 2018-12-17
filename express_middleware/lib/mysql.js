@@ -369,6 +369,40 @@ Mysql.awaitInsertDB = function(query) {
         })
     })
 };
+Mysql.awaitDeleteDB = function(query) {
+    var sql = "DELETE FROM " + query.table + " ";
+    count = 0;
+
+    for (var i in query) {
+        if (typeof (query[i]) != "undefined" && i != "table") {
+            if (count == 0) {
+                sql = sql + "where " + i + "='" + query[i] + "' ";
+            } else {
+                sql = sql + "and " + i + "='" + query[i] + "' ";
+            }
+            count = 1;
+        }
+    }
+    Utils.log(sql);
+
+    return new Promise(( resolve, reject ) => {
+        pool.getConnection(function(err, connection) {
+            if (err) {
+                reject( err )
+            } else {
+                connection.query(sql,  ( err ) => {
+                    if ( err ) {
+                        reject( err )
+                    } else {
+                        resolve();
+                    }
+                    // 结束会话
+                    connection.release()
+                })
+            }
+        })
+    })
+};
 
 //老的方法，未来统一优化掉;
 Mysql.selectDB = function (query, callback) {
